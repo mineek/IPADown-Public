@@ -142,6 +142,20 @@ if ssl:
 else:
     threading.Thread(target=socketio.run, args=(app, '0.0.0.0', 9001)).start()
 
+# Detect our local IP address
+baseIP = None
+try:
+    import socket
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect(("8.8.8.8", 80))
+    baseIP = s.getsockname()[0]
+    s.close()
+except:
+    print("Failed to get local IP address, exiting...")
+    exit(1)
+
+print(f"Local IP: {baseIP}")
+
 @app.route('/', methods=['GET'])
 def index():
     indexhtml = """
@@ -162,7 +176,7 @@ def index():
                 logbox.scrollTop = logbox.scrollHeight;
             }
 
-            var socket = io('https://192.168.1.122:9001');
+            var socket = io('https://""" + baseIP + """:9001');
             socket.on('log', log);
 
             function download(appId) {
@@ -229,7 +243,7 @@ def index():
                         window.URL.revokeObjectURL(url);
                         log('Redirecting to OTA page...');
                         setTimeout(() => {
-                            window.location.href = `itms-services://?action=download-manifest&url=https://192.168.1.122/ota/${appId}/${appVerId}`;
+                            window.location.href = `itms-services://?action=download-manifest&url=https://""" + baseIP + """/ota/${appId}/${appVerId}`;
                         }, 3000);
                     }, 3000);
                 });
@@ -310,7 +324,7 @@ def ota(appId, appVerId):
 					<key>kind</key>
 					<string>software-package</string>
 					<key>url</key>
-					<string>https://192.168.1.122/ipas/{appName}</string>
+					<string>https://{baseIP}/ipas/{appName}</string>
 				</dict>
 			</array>
 			<key>metadata</key>
