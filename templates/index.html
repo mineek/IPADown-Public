@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>IPATool</title>
+        <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+    </head>
+    <body>
+        <h1>IPATool</h1>
+        <!-- log box -->
+        <div id="logbox" style="width: 80%; height: 300px; overflow: auto; border: 1px solid black; padding: 5px; margin: 5px;"></div>
+        <script>
+            function log(msg) {
+                var logbox = document.getElementById('logbox');
+                logbox.innerHTML += "[*] " + msg + "<br>";
+                logbox.scrollTop = logbox.scrollHeight;
+            }
+
+            var socket = io('{{ baseIP }}:9001');
+            socket.on('log', log);
+
+            function download(appId) {
+                log('Downloading app ' + appId + '...');
+                fetch('/download', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: `appId=${appId}`
+                })
+                .then(response => response.blob())
+                .then(blob => {
+                    log('Downloaded app ' + appId + '!, creating download link...');
+                    setTimeout(() => {
+                        var url = window.URL.createObjectURL(blob);
+                        var a = document.createElement('a');
+                        a.href = url;
+                        a.download = appId + '.ipa';
+                        document.body.appendChild(a);
+                        a.click();
+                        a.remove();
+                        window.URL.revokeObjectURL(url);
+                    }, 3000);
+                });
+            }
+
+            function getOlderVersions(appId) {
+                log('Getting older versions for app ' + appId + '...');
+                fetch('/olderVersions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: `appId=${appId}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    log('Got older versions for app ' + appId + '!');
+                    log('Versions: ' + data.appVerIds.join(', '));
+                });
+            }
+
+            function downloadOlder(appId, appVerId) {
+                log('Downloading older version ' + appVerId + ' for app ' + appId + '...');
+                fetch('/downloadOlder', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: `appId=${appId}&appVerId=${appVerId}`
+                })
+                .then(response => response.blob())
+                .then(blob => {
+                    log('Downloaded older version ' + appVerId + ' for app ' + appId + '!, creating download link...');
+                    setTimeout(() => {
+                        var url = window.URL.createObjectURL(blob);
+                        var a = document.createElement('a');
+                        a.href = url;
+                        a.download = appId + '-' + appVerId + '.ipa';
+                        document.body.appendChild(a);
+                        a.click();
+                        a.remove();
+                        window.URL.revokeObjectURL(url);
+                        log('Redirecting to OTA page...');
+                        setTimeout(() => {
+                            window.location.href = `itms-services://?action=download-manifest&url={{ baseIP }}/ota/${appId}/${appVerId}`;
+                        }, 3000);
+                    }, 3000);
+                });
+            }
+        </script>
+        <h2>Download IPA (latest version)</h2>
+        <form onsubmit="download(this.appId.value); return false;">
+            <label for="appId">App ID:</label>
+            <input type="text" id="appId" name="appId">
+            <input type="submit" value="Download">
+        </form>
+        <br>
+        <h2>Download IPA (older version)</h2>
+        <form onsubmit="downloadOlder(this.appId.value, this.appVerId.value); return false;">
+            <label for="appId">App ID:</label>
+            <input type="text" id="appId" name="appId">
+            <label for="appVerId">Version ID:</label>
+            <input type="text" id="appVerId" name="appVerId">
+            <input type="submit" value="Download">
+        </form>
+        <br>
+        <h2>Get older versions</h2>
+        <form onsubmit="getOlderVersions(this.appId.value); return false;">
+            <label for="appId">App ID:</label>
+            <input type="text" id="appId" name="appId">
+            <input type="submit" value="Get older versions">
+        </form>
+    </body>
+</html>
