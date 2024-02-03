@@ -88,6 +88,13 @@
                 });
             }
         </script>
+        <h2>Search by Bundle ID</h2>
+        <form onsubmit="window.location.href = '/search/' + this.bundleId.value; return false;">
+            <label for="bundleId">Bundle ID:</label>
+            <input type="text" id="bundleId" name="bundleId">
+            <input type="submit" value="Search">
+        </form>
+        <br>
         <h2>Download IPA (latest version)</h2>
         <form onsubmit="download(this.appId.value); return false;">
             <label for="appId">App ID:</label>

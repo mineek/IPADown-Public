@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>IPATool - Search Results for {{ query }}</title>
+    </head>
+    <body>
+        <h1>IPATool</h1>
+        <p>Search results for '{{ query }}':</p>
+        <p>Back to <a href="/">home</a></p>
+        <table>
+            <tr>
+                <th>App Name</th>
+                <th>App ID</th>
+                <th>Bundle ID</th>
+                <th>Download</th>
+            </tr>
+            <tr>
+                <td>{{ app.name }}</td>
+                <td>{{ app.appId }}</td>
+                <td>{{ app.bundleId }}</td>
+                <td><button onclick="download('{{ app.appId }}')">Download</button></td>
+            </tr>
+        </table>
+        <script>
+            // check if we even have a app json
+            if ('{{ app }}' == 'None') {
+                document.querySelector('table').innerHTML = '<tr><td colspan="4">No results found</td></tr>';
+            }
+            function download(appId) {
+                fetch('/download', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: `appId=${appId}`
+                })
+                .then(response => response.blob())
+                .then(blob => {
+                    var url = window.URL.createObjectURL(blob);
+                    var a = document.createElement('a');
+                    a.href = url;
+                    a.download = appId + '.ipa';
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                });
+            }
+        </script>
+    </body>
+</html>

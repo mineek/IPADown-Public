@@ -165,6 +165,30 @@ baseIP = f"https://{baseIP}" if useHTTPS else f"http://{baseIP}"
 def index():
     return render_template('index.html', baseIP=baseIP)
 
+@app.route('/search/<query>', methods=['GET'])
+def search(query):
+    ipaTool = IPATool()
+    args = {
+        "appleid": appleidemail,
+        "password": appleidpass,
+        "bundle_id": query,
+        "output_dir": "ipas",
+        "downloadAllVersion": False,
+        "itunes_server": "http://127.0.0.1:9000",
+        "session_dir": None,
+        "log_level": "info",
+        "out_json": True,
+        "country": "us",
+        "appId": None,
+        "get_verid": False,
+        "purchase": False
+    }
+    args = argparse.Namespace(**args)
+    ipaTool.handleLookup(args)
+    apps = ipaTool.jsonOut
+    print(apps)
+    return render_template('searchresults.html', query=query, app=apps)
+
 # for OTA itms-services
 @app.route('/ota/<appId>/<appVerId>', methods=['GET'])
 def ota(appId, appVerId):
