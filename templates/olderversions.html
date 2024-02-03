@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>IPATool</title>
+    </head>
+    <body>
+        <h1>IPATool</h1>
+        <p>Back to <a href="/">home</a></p>
+        <table>
+            {% for appVerId in appVerIds %}
+            <tr>
+                <th>App Version ID</th>
+                <th>Download</th>
+            </tr>
+            <tr>
+                <td>{{ appVerId }}</td>
+                <td><button onclick="download('{{ appId }}', '{{ appVerId }}')">Download</button></td>
+            </tr>
+            {% endfor %}
+        </table>
+        <script>
+            function download(appId, appVerId) {
+                fetch('/downloadOlder', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: `appId=${appId}&appVerId=${appVerId}`
+                })
+                .then(response => response.blob())
+                .then(blob => {
+                    var url = window.URL.createObjectURL(blob);
+                    var a = document.createElement('a');
+                    a.href = url;
+                    a.download = appId + '.ipa';
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+                });
+            }
+        </script>
+    </body>
+</html>

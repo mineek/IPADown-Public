@@ -95,6 +95,13 @@
             <input type="submit" value="Search">
         </form>
         <br>
+        <h2>Get older versions</h2>
+        <form onsubmit="window.location.href = '/olderVersions/' + this.appId.value; return false;">
+            <label for="appId">App ID:</label>
+            <input type="text" id="appId" name="appId">
+            <input type="submit" value="Get older versions">
+        </form>
+        <br>
         <h2>Download IPA (latest version)</h2>
         <form onsubmit="download(this.appId.value); return false;">
             <label for="appId">App ID:</label>
@@ -111,7 +118,7 @@
             <input type="submit" value="Download">
         </form>
         <br>
-        <h2>Get older versions</h2>
+        <h2>Get older versions (old)</h2>
         <form onsubmit="getOlderVersions(this.appId.value); return false;">
             <label for="appId">App ID:</label>
             <input type="text" id="appId" name="appId">

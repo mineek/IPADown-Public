@@ -189,6 +189,27 @@ def search(query):
     print(apps)
     return render_template('searchresults.html', query=query, app=apps)
 
+@app.route('/olderVersions/<appId>', methods=['GET'])
+def olderVersionsPage(appId):
+    ipaTool = IPATool()
+    args = {
+        "appleid": appleidemail,
+        "password": appleidpass,
+        "appId": appId,
+        "purchase": True,
+        "output_dir": "ipas",
+        "downloadAllVersion": False,
+        "appVerId": None,
+        "itunes_server": "http://127.0.0.1:9000",
+        "session_dir": None,
+        "log_level": "info",
+        "out_json": True
+    }
+    args = argparse.Namespace(**args)
+    ipaTool.handleHistoryVersion(args)
+    print(ipaTool.jsonOut)
+    return render_template('olderversions.html', appId=appId, appVerIds=ipaTool.jsonOut['appVerIds'])
+
 # for OTA itms-services
 @app.route('/ota/<appId>/<appVerId>', methods=['GET'])
 def ota(appId, appVerId):
