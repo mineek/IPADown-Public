@@ -156,6 +156,11 @@ except:
 
 print(f"Local IP: {baseIP}")
 
+useHTTPS = False
+if ssl:
+    useHTTPS = True
+baseIP = f"https://{baseIP}" if useHTTPS else f"http://{baseIP}"
+
 @app.route('/', methods=['GET'])
 def index():
     indexhtml = """
@@ -176,7 +181,7 @@ def index():
                 logbox.scrollTop = logbox.scrollHeight;
             }
 
-            var socket = io('https://""" + baseIP + """:9001');
+            var socket = io('""" + baseIP + """:9001');
             socket.on('log', log);
 
             function download(appId) {
@@ -243,7 +248,7 @@ def index():
                         window.URL.revokeObjectURL(url);
                         log('Redirecting to OTA page...');
                         setTimeout(() => {
-                            window.location.href = `itms-services://?action=download-manifest&url=https://""" + baseIP + """/ota/${appId}/${appVerId}`;
+                            window.location.href = `itms-services://?action=download-manifest&url=""" + baseIP + """/ota/${appId}/${appVerId}`;
                         }, 3000);
                     }, 3000);
                 });
@@ -324,7 +329,7 @@ def ota(appId, appVerId):
 					<key>kind</key>
 					<string>software-package</string>
 					<key>url</key>
-					<string>https://{baseIP}/ipas/{appName}</string>
+					<string>{baseIP}/ipas/{appName}</string>
 				</dict>
 			</array>
 			<key>metadata</key>
